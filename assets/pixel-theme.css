@@ -40,3 +40,11 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,su
 @media(max-width:1000px){.project-grid{grid-template-columns:1fr}.hero{padding:28px}.site-shell{grid-template-columns:175px minmax(0,1fr)}.content-column{padding:26px}.hero h1{font-size:40px}}
 @media(max-width:700px){body{padding:10px}.site-header{padding:20px 18px;gap:14px}.wordmark{font-size:34px}.header-github{font-size:11px}.language-control{margin-inline-start:0}.motion-toggle{font-size:10px;padding:6px 8px}.thinking-line{padding:12px 18px;font-size:10px}.site-shell{display:block}.sidebar{padding:12px;border-right:0;border-bottom:1px solid var(--line)}.primary-nav{display:flex;flex-wrap:wrap;gap:4px}.primary-nav a{font-size:12px;padding:10px 9px}.sidebar-extra,.sidebar-window-title{display:none}.content-column{padding:24px 18px}.hero{min-height:340px;padding:28px 20px}.hero h1{font-size:clamp(29px,7vw,44px)}.pixel-caption{left:12px;font-size:8px}.post-row{grid-template-columns:1fr;gap:8px}.post-summary h2{font-size:20px}.post-meta{display:flex;gap:12px;flex-wrap:wrap}.project-card{padding:18px}.prose{font-size:17px}.site-footer{flex-wrap:wrap}.pixel-background{opacity:.13}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;scroll-behavior:auto!important;transition:none!important}}
+/* Sharper, sparse currents; typography keeps a quieter violet accent. */
+:root{--yellow:#bba0ef;--purple:#bba0ef;--line:#302c38}
+.pixel-background{opacity:.62;image-rendering:pixelated;image-rendering:crisp-edges}
+.pixel-hero{inset:-32px auto auto -32px;max-width:none;opacity:.8;image-rendering:pixelated;image-rendering:crisp-edges;will-change:transform}
+.hero h1 em{color:#d6c7f1}.hero .eyebrow,.pixel-caption{color:#c6b1ee}.primary-nav a[aria-current=page]{background:#bba0ef0a}.primary-nav a:hover,.rss-link:hover{background:#18131e}
+.hero-copy h1{background:#000e;box-shadow:12px 0 #000e,-12px 0 #000e}
+@media(max-width:700px){.pixel-background{opacity:.5}}
+@media(prefers-reduced-motion:reduce){.pixel-hero{will-change:auto}}
