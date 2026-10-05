@@ -1,0 +1,103 @@
+<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#101218"><title>Princípios SOLID · neto</title><meta name="description" content="SOLID e suas aplicações práticas."><meta name="author" content="Neto Silveira"><link rel="canonical" href="https://zqovark.github.io/posts/solid-principles/"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="alternate" type="application/rss+xml" title="neto RSS" href="/rss.xml"><meta property="og:type" content="article"><meta property="og:title" content="Princípios SOLID · neto"><meta property="og:description" content="SOLID e suas aplicações práticas."><meta property="og:url" content="https://zqovark.github.io/posts/solid-principles/"><meta property="og:site_name" content="neto"><meta property="og:image" content="https://zqovark.github.io/social.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:locale" content="pt_BR"><meta name="twitter:card" content="summary_large_image"><meta property="article:published_time" content="2019-09-09T12:01:00.000Z"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Princípios SOLID","description":"SOLID e suas aplicações práticas.","url":"https://zqovark.github.io/posts/solid-principles/","datePublished":"2019-09-09T12:01:00.000Z","dateModified":"2026-10-04T00:00:00.000Z","author":{"@type":"Person","name":"Neto Silveira","url":"https://zqovark.github.io/sobre/"}}</script><link rel="stylesheet" href="/_astro/Layout.DWrYQrxI.css"></head><body><a class="skip-link" href="#conteudo">Pular para o conteúdo</a><header class="site-header"><span class="frame-screw screw-start" aria-hidden="true"></span><span class="frame-screw screw-end" aria-hidden="true"></span><a class="wordmark notranslate" translate="no" data-glitch="neto." href="/" aria-label="Neto, página inicial">neto<span>.</span></a><a class="header-github" href="https://github.com/zqovark" target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true">↗</span></a><div class="language-control notranslate" translate="no"><span class="language-label">Idioma / Language</span><div id="translation-widget"></div><span class="language-fallback">Português</span></div><script>
+  (() => {
+    let storageAvailable = false;
+    try { localStorage.getItem('gt_autoswitch'); storageAvailable = true; } catch {}
+    window.gtranslateSettings = {
+      default_language: 'pt',
+      native_language_names: true,
+      detect_browser_language: storageAvailable,
+      wrapper_selector: '#translation-widget',
+      select_language_label: 'Idioma / Language',
+    };
+    const root = document.documentElement;
+    const rightToLeft = ['ar', 'iw', 'he', 'fa', 'ur', 'ps', 'sd', 'yi'];
+    function updateDirection() {
+      root.dir = rightToLeft.includes(root.lang.split('-')[0]) ? 'rtl' : 'ltr';
+    }
+    new MutationObserver(updateDirection).observe(root, { attributes: true, attributeFilter: ['lang'] });
+    updateDirection();
+  })();
+</script><script src="https://cdn.gtranslate.net/widgets/latest/dropdown.js" defer></script></header><p class="thinking-line"><span>O que estou pensando agora:</span> Interfaces adaptativas em sistemas web complexos e mudanças em tempo real com LLMs</p><div class="site-shell"><aside class="sidebar"><p class="sidebar-window-title">Links</p><nav class="primary-nav" aria-label="Navegação principal"><a href="/" aria-current="page">Escritos</a><a href="/projetos/">Projetos</a><a href="/sobre/">Sobre</a><a href="/search/">Buscar</a></nav><div class="sidebar-extra"><p class="sidebar-label">Temas</p><nav class="tag-nav" aria-label="Temas dos artigos"><a href="/tags/java/">#java</a><a href="/tags/api/">#api</a><a href="/tags/computacao-grafica/">#computação-gráfica</a><a href="/tags/concorrencia/">#concorrência</a><a href="/tags/http/">#http</a><a href="/tags/implementacao/">#implementação</a><a href="/tags/orientacao-a-objetos/">#orientação-a-objetos</a><a class="quiet-link" href="/tags/">Todas as tags <span aria-hidden="true">→</span></a></nav><p class="sidebar-label">Projetos</p><nav class="lab-nav" aria-label="Projetos"><a class="notranslate" translate="no" href="/projetos/synesthesia/">Synesthesia <span aria-hidden="true">↗</span></a><a class="notranslate" translate="no" href="/projetos/squelch/">Squelch <span aria-hidden="true">↗</span></a></nav><p class="sidebar-label">Acompanhe</p><a class="rss-link" href="/rss.xml">Feed RSS <span aria-hidden="true">↗</span></a></div></aside><div class="content-column"><main id="conteudo"><a class="back-link" href="/posts/">← Todos os escritos</a><article class="post-detail"><header class="article-heading"><p class="eyebrow">Escritos</p><h1>Princípios SOLID</h1><p class="article-meta"><span class="notranslate" translate="no">Neto Silveira</span> <span aria-hidden="true">·</span> <time datetime="2019-09-09T12:01:00.000Z">09 de set. de 2019</time> <span aria-hidden="true">·</span> 3 min de leitura</p><p class="article-meta">Atualizado em 04 de out. de 2026</p><ul class="post-tags" aria-label="Tags"><li><a href="/tags/programacao/">#programação</a></li><li><a href="/tags/orientacao-a-objetos/">#orientação-a-objetos</a></li><li><a href="/tags/solid/">#solid</a></li></ul></header><details class="toc"><summary>Neste artigo</summary><nav aria-label="Sumário do artigo"><ul><li class="toc-depth-1"><a href="#o-que-é-solid">O que é SOLID</a></li><li class="toc-depth-1"><a href="#princípio-da-responsabilidade-única-srp">Princípio da Responsabilidade Única (SRP)</a></li><li class="toc-depth-2"><a href="#exemplos">Exemplos</a></li><li class="toc-depth-2"><a href="#o-princípio-da-responsabilidade-única-mvc-e-ddd">O princípio da responsabilidade única, MVC e DDD.</a></li><li class="toc-depth-3"><a href="#modelo-visão-e-controlador-mvc">Modelo, visão e controlador (MVC)</a></li><li class="toc-depth-3"><a href="#design-guiado-pelo-domínio-ddd">Design guiado pelo domínio (DDD)</a></li></ul></nav></details><div class="prose"><h1 id="o-que-é-solid">O que é SOLID</h1>
+<p>SOLID é um conjunto de princípios de design que ajuda os desenvolvedores a criar softwares mais sustentáveis, escaláveis e flexíveis usando OOP. Esses princípios foram introduzidos pela primeira vez por Robert C. Martin (também conhecido como Uncle Bob) em seu livro “Desenvolvimento Ágil de Software, Princípios, Padrões e Práticas”.</p>
+<p>Existem cinco princípios no SOLID, que são frequentemente referidos por suas siglas: SRP, OCP, LSP, ISP e DIP.</p>
+<ul>
+<li>Princípio da Responsabilidade Única (SRP)</li>
+<li>Princípio Aberto-Fechado (OCP)</li>
+<li>Princípio da Substituição de Liskov (LSP)</li>
+<li>Princípio da Segregação da Interface (ISP)</li>
+<li>Princípio da Inversão de Dependência (DIP)
+<br><br></li>
+</ul>
+<h1 id="princípio-da-responsabilidade-única-srp">Princípio da Responsabilidade Única (SRP)</h1>
+<p>O “princípio da Responsabilidade Única” é um conceito fundamental na engenharia de software que afirma que uma classe ou componente deve ter apenas UMA responsabilidade. O bônus prático de utilizar esse conceito no desenvolvimento é organização que traz legibilidade e manutenabilidade.</p>
+<h2 id="exemplos">Exemplos</h2>
+<p>O código a seguir viola o princípio SRP porque contém múltiplas responsabilidades em uma única classe.</p>
+<pre class="notranslate" style="background-color:#292D3E;color:#babed8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="java" translate="no"><code class="notranslate" translate="no"><span class="line"><span style="color:#C792EA">public</span><span style="color:#C792EA"> class</span><span style="color:#FFCB6B"> Exemplo</span><span style="color:#89DDFF"> {</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#C792EA">  public</span><span style="color:#C792EA"> List</span><span style="color:#89DDFF">&#x3C;</span><span style="color:#C792EA">Post</span><span style="color:#89DDFF">></span><span style="color:#82AAFF"> carregarFeed</span><span style="color:#89DDFF">()</span><span style="color:#89DDFF"> {</span></span>
+<span class="line"><span style="color:#676E95;font-style:italic">    // lógica para carregar as atualizações mais recentes do feed de notícias</span></span>
+<span class="line"><span style="color:#89DDFF">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#C792EA">  public</span><span style="color:#C792EA"> void</span><span style="color:#82AAFF"> exibirNotificacoes</span><span style="color:#89DDFF">()</span><span style="color:#89DDFF"> {</span></span>
+<span class="line"><span style="color:#676E95;font-style:italic">    // lógica para exibir as notificações do usuário</span></span>
+<span class="line"><span style="color:#89DDFF">  }</span></span>
+<span class="line"><span style="color:#C792EA">  public</span><span style="color:#C792EA"> List</span><span style="color:#89DDFF">&#x3C;</span><span style="color:#C792EA">Post</span><span style="color:#89DDFF">></span><span style="color:#82AAFF"> filtrarFeedPorTipo</span><span style="color:#89DDFF">(</span><span style="color:#C792EA">TipoPostagem</span><span style="color:#BABED8;font-style:italic"> tipo</span><span style="color:#89DDFF">)</span><span style="color:#89DDFF"> {</span></span>
+<span class="line"><span style="color:#676E95;font-style:italic">    // lógica para filtrar o feed de notícias por tipo de postagem</span></span>
+<span class="line"><span style="color:#89DDFF">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#C792EA">  public</span><span style="color:#C792EA"> List</span><span style="color:#89DDFF">&#x3C;</span><span style="color:#C792EA">Amigo</span><span style="color:#89DDFF">></span><span style="color:#82AAFF"> listarAmigos</span><span style="color:#89DDFF">()</span><span style="color:#89DDFF"> {</span></span>
+<span class="line"><span style="color:#676E95;font-style:italic">    // lógica para listar os amigos do usuário</span></span>
+<span class="line"><span style="color:#89DDFF">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#89DDFF">}</span></span></code></pre>
+<p>O ideal seria implementar todas essas classes, cada uma com sua responsabilidade. O código a seguir é um exemplo, portanto <code class="notranslate" translate="no">FeedLoader</code> que tem o método <code class="notranslate" translate="no">carregarFeed()</code> mas normalmente haveriam outros métodos relativos a responsabilidade desta classe.</p>
+<pre class="notranslate" style="background-color:#292D3E;color:#babed8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="java" translate="no"><code class="notranslate" translate="no"><span class="line"><span style="color:#C792EA">public</span><span style="color:#C792EA"> class</span><span style="color:#FFCB6B"> FeedLoader</span><span style="color:#89DDFF"> {</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#C792EA">  public</span><span style="color:#C792EA"> List</span><span style="color:#89DDFF">&#x3C;</span><span style="color:#C792EA">Post</span><span style="color:#89DDFF">></span><span style="color:#82AAFF"> carregarFeed</span><span style="color:#89DDFF">()</span><span style="color:#89DDFF"> {</span></span>
+<span class="line"><span style="color:#676E95;font-style:italic">    // lógica para carregar as atualizações mais recentes do feed de notícias</span></span>
+<span class="line"><span style="color:#89DDFF">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#89DDFF">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#C792EA">public</span><span style="color:#C792EA"> class</span><span style="color:#FFCB6B"> FeedFilter</span><span style="color:#89DDFF"> {</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#C792EA">  public</span><span style="color:#C792EA"> List</span><span style="color:#89DDFF">&#x3C;</span><span style="color:#C792EA">Post</span><span style="color:#89DDFF">></span><span style="color:#82AAFF"> filtrarFeedPorTipo</span><span style="color:#89DDFF">(</span><span style="color:#C792EA">List</span><span style="color:#89DDFF">&#x3C;</span><span style="color:#C792EA">Post</span><span style="color:#89DDFF">></span><span style="color:#BABED8;font-style:italic"> feed</span><span style="color:#89DDFF">,</span><span style="color:#C792EA"> TipoPostagem</span><span style="color:#BABED8;font-style:italic"> tipo</span><span style="color:#89DDFF">)</span><span style="color:#89DDFF"> {</span></span>
+<span class="line"><span style="color:#676E95;font-style:italic">    // lógica para filtrar o feed de notícias por tipo de postagem</span></span>
+<span class="line"><span style="color:#89DDFF">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#89DDFF">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#C792EA">public</span><span style="color:#C792EA"> class</span><span style="color:#FFCB6B"> FriendsManager</span><span style="color:#89DDFF"> {</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#C792EA">  public</span><span style="color:#C792EA"> List</span><span style="color:#89DDFF">&#x3C;</span><span style="color:#C792EA">Amigo</span><span style="color:#89DDFF">></span><span style="color:#82AAFF"> listarAmigos</span><span style="color:#89DDFF">()</span><span style="color:#89DDFF"> {</span></span>
+<span class="line"><span style="color:#676E95;font-style:italic">    // lógica para listar os amigos do usuário</span></span>
+<span class="line"><span style="color:#89DDFF">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#C792EA">  public</span><span style="color:#C792EA"> void</span><span style="color:#82AAFF"> adicionarAmigo</span><span style="color:#89DDFF">(</span><span style="color:#C792EA">Amigo</span><span style="color:#BABED8;font-style:italic"> amigo</span><span style="color:#89DDFF">)</span><span style="color:#89DDFF"> {</span></span>
+<span class="line"><span style="color:#676E95;font-style:italic">    // lógica para adicionar um novo amigo à lista</span></span>
+<span class="line"><span style="color:#89DDFF">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#C792EA">  public</span><span style="color:#C792EA"> void</span><span style="color:#82AAFF"> removerAmigo</span><span style="color:#89DDFF">(</span><span style="color:#C792EA">Amigo</span><span style="color:#BABED8;font-style:italic"> amigo</span><span style="color:#89DDFF">)</span><span style="color:#89DDFF"> {</span></span>
+<span class="line"><span style="color:#676E95;font-style:italic">    // lógica para remover um amigo da lista</span></span>
+<span class="line"><span style="color:#89DDFF">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#89DDFF">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#C792EA">public</span><span style="color:#C792EA"> class</span><span style="color:#FFCB6B"> Notifications</span><span style="color:#89DDFF"> {</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#C792EA">  public</span><span style="color:#C792EA"> void</span><span style="color:#82AAFF"> exibirNotificacoes</span><span style="color:#89DDFF">()</span><span style="color:#89DDFF"> {</span></span>
+<span class="line"><span style="color:#676E95;font-style:italic">    // lógica para exibir as notificações do usuário</span></span>
+<span class="line"><span style="color:#89DDFF">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#89DDFF">}</span></span></code></pre>
+<h2 id="o-princípio-da-responsabilidade-única-mvc-e-ddd">O princípio da responsabilidade única, MVC e DDD.</h2>
+<p>O conceito está fortemente relacionado com o Domain-Driven Design (DDD) e o padrão de arquitetura MVC.
+<br><br></p>
+<h3 id="modelo-visão-e-controlador-mvc">Modelo, visão e controlador (MVC)</h3>
+<p>No padrão de arquitetura MVC, o SRP é aplicado para separar as responsabilidades de cada componente.</p>
+<p><code class="notranslate" translate="no">Model</code> é responsável apenas por gerenciar os dados do sistema.</p>
+<p><code class="notranslate" translate="no">View</code> é responsável apenas por exibir esses dados para o usuário.</p>
+<p><code class="notranslate" translate="no">Controller</code> é responsável apenas por atualizar o <code class="notranslate" translate="no">Model</code> e a <code class="notranslate" translate="no">View</code> de acordo com as entradas do usuário.
+<br><br></p>
+<h3 id="design-guiado-pelo-domínio-ddd">Design guiado pelo domínio (DDD)</h3>
+<p>No <code class="notranslate" translate="no">DDD</code>, a ideia de responsabilidade é fundamental para a modelagem de um domínio rico e expressivo. Cada classe ou componente do sistema deve ter uma única responsabilidade clara e definida, de modo que cada parte do modelo de domínio represente um único conceito.</p></div><nav class="article-pagination" aria-label="Outros artigos"><a href="/posts/thread/"><span>Mais recente</span><strong>Threads →</strong></a></nav></article></main><footer class="site-footer"><span>© 2026 Neto Silveira</span><div><a href="/rss.xml">RSS</a><a href="https://github.com/zqovark" target="_blank" rel="noopener noreferrer">GitHub ↗</a><a href="#conteudo">Voltar ao topo ↑</a></div></footer></div></div></body></html>

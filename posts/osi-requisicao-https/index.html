@@ -1,0 +1,168 @@
+<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#101218"><title>Investigando uma requisição HTTPS e modelo OSI · neto</title><meta name="description" content="DNS, conexão TCP, TLS e HTTP: como separar as etapas de uma requisição que falhou."><meta name="author" content="Neto Silveira"><link rel="canonical" href="https://zqovark.github.io/posts/osi-requisicao-https/"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="alternate" type="application/rss+xml" title="neto RSS" href="/rss.xml"><meta property="og:type" content="article"><meta property="og:title" content="Investigando uma requisição HTTPS e modelo OSI · neto"><meta property="og:description" content="DNS, conexão TCP, TLS e HTTP: como separar as etapas de uma requisição que falhou."><meta property="og:url" content="https://zqovark.github.io/posts/osi-requisicao-https/"><meta property="og:site_name" content="neto"><meta property="og:image" content="https://zqovark.github.io/social.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:locale" content="pt_BR"><meta name="twitter:card" content="summary_large_image"><meta property="article:published_time" content="2022-09-05T00:00:00.000Z"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Investigando uma requisição HTTPS e modelo OSI","description":"DNS, conexão TCP, TLS e HTTP: como separar as etapas de uma requisição que falhou.","url":"https://zqovark.github.io/posts/osi-requisicao-https/","datePublished":"2022-09-05T00:00:00.000Z","dateModified":"2022-09-05T00:00:00.000Z","author":{"@type":"Person","name":"Neto Silveira","url":"https://zqovark.github.io/sobre/"}}</script><link rel="stylesheet" href="/_astro/Layout.DWrYQrxI.css"></head><body><a class="skip-link" href="#conteudo">Pular para o conteúdo</a><header class="site-header"><span class="frame-screw screw-start" aria-hidden="true"></span><span class="frame-screw screw-end" aria-hidden="true"></span><a class="wordmark notranslate" translate="no" data-glitch="neto." href="/" aria-label="Neto, página inicial">neto<span>.</span></a><a class="header-github" href="https://github.com/zqovark" target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true">↗</span></a><div class="language-control notranslate" translate="no"><span class="language-label">Idioma / Language</span><div id="translation-widget"></div><span class="language-fallback">Português</span></div><script>
+  (() => {
+    let storageAvailable = false;
+    try { localStorage.getItem('gt_autoswitch'); storageAvailable = true; } catch {}
+    window.gtranslateSettings = {
+      default_language: 'pt',
+      native_language_names: true,
+      detect_browser_language: storageAvailable,
+      wrapper_selector: '#translation-widget',
+      select_language_label: 'Idioma / Language',
+    };
+    const root = document.documentElement;
+    const rightToLeft = ['ar', 'iw', 'he', 'fa', 'ur', 'ps', 'sd', 'yi'];
+    function updateDirection() {
+      root.dir = rightToLeft.includes(root.lang.split('-')[0]) ? 'rtl' : 'ltr';
+    }
+    new MutationObserver(updateDirection).observe(root, { attributes: true, attributeFilter: ['lang'] });
+    updateDirection();
+  })();
+</script><script src="https://cdn.gtranslate.net/widgets/latest/dropdown.js" defer></script></header><p class="thinking-line"><span>O que estou pensando agora:</span> Interfaces adaptativas em sistemas web complexos e mudanças em tempo real com LLMs</p><div class="site-shell"><aside class="sidebar"><p class="sidebar-window-title">Links</p><nav class="primary-nav" aria-label="Navegação principal"><a href="/" aria-current="page">Escritos</a><a href="/projetos/">Projetos</a><a href="/sobre/">Sobre</a><a href="/search/">Buscar</a></nav><div class="sidebar-extra"><p class="sidebar-label">Temas</p><nav class="tag-nav" aria-label="Temas dos artigos"><a href="/tags/java/">#java</a><a href="/tags/api/">#api</a><a href="/tags/computacao-grafica/">#computação-gráfica</a><a href="/tags/concorrencia/">#concorrência</a><a href="/tags/http/">#http</a><a href="/tags/implementacao/">#implementação</a><a href="/tags/orientacao-a-objetos/">#orientação-a-objetos</a><a class="quiet-link" href="/tags/">Todas as tags <span aria-hidden="true">→</span></a></nav><p class="sidebar-label">Projetos</p><nav class="lab-nav" aria-label="Projetos"><a class="notranslate" translate="no" href="/projetos/synesthesia/">Synesthesia <span aria-hidden="true">↗</span></a><a class="notranslate" translate="no" href="/projetos/squelch/">Squelch <span aria-hidden="true">↗</span></a></nav><p class="sidebar-label">Acompanhe</p><a class="rss-link" href="/rss.xml">Feed RSS <span aria-hidden="true">↗</span></a></div></aside><div class="content-column"><main id="conteudo"><a class="back-link" href="/posts/">← Todos os escritos</a><article class="post-detail"><header class="article-heading"><p class="eyebrow">Escritos</p><h1>Investigando uma requisição HTTPS e modelo OSI</h1><p class="article-meta"><span class="notranslate" translate="no">Neto Silveira</span> <span aria-hidden="true">·</span> <time datetime="2022-09-05T00:00:00.000Z">05 de set. de 2022</time> <span aria-hidden="true">·</span> 8 min de leitura</p><ul class="post-tags" aria-label="Tags"><li><a href="/tags/redes/">#redes</a></li><li><a href="/tags/osi/">#osi</a></li><li><a href="/tags/http/">#http</a></li></ul></header><details class="toc"><summary>Neste artigo</summary><nav aria-label="Sumário do artigo"><ul><li class="toc-depth-2"><a href="#as-sete-camadas">As sete camadas</a></li><li class="toc-depth-2"><a href="#escolher-o-caminho-que-vamos-observar">Escolher o caminho que vamos observar</a></li><li class="toc-depth-2"><a href="#1-resolver-o-nome">1. Resolver o nome</a></li><li class="toc-depth-2"><a href="#2-estabelecer-a-conexão-tcp">2. Estabelecer a conexão TCP</a></li><li class="toc-depth-2"><a href="#3-negociar-tls">3. Negociar TLS</a></li><li class="toc-depth-2"><a href="#4-observar-http">4. Observar HTTP</a></li><li class="toc-depth-2"><a href="#medir-as-etapas">Medir as etapas</a></li><li class="toc-depth-2"><a href="#captura-de-pacotes">Captura de pacotes</a></li><li class="toc-depth-2"><a href="#separar-sintoma-de-causa">Separar sintoma de causa</a></li><li class="toc-depth-2"><a href="#referências">Referências</a></li></ul></nav></details><div class="prose"><p>Considere uma aplicação que chama uma API por HTTPS. A requisição demora alguns segundos e termina com um erro. O serviço está fora do ar? O nome não resolveu? A conexão chegou ao servidor, mas o certificado foi rejeitado?</p>
+<p>Esses problemas acontecem em etapas diferentes. O modelo OSI ajuda a organizar a investigação, desde que não seja tratado como uma lista de sete processos que toda requisição executa.</p>
+<h2 id="as-sete-camadas">As sete camadas</h2>
+<p>OSI é um modelo de referência para comunicação entre sistemas. As camadas separam responsabilidades:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Camada</th><th>Responsabilidade no modelo</th><th>O que observar em uma investigação</th></tr></thead><tbody><tr><td>7. Aplicação</td><td>Serviços de comunicação usados pelas aplicações</td><td>Requisição e resposta HTTP, nomes DNS</td></tr><tr><td>6. Apresentação</td><td>Representação e transformação dos dados</td><td>Formato e codificação dos dados</td></tr><tr><td>5. Sessão</td><td>Organização e controle do diálogo</td><td>Estado e continuidade da comunicação</td></tr><tr><td>4. Transporte</td><td>Comunicação entre os pontos finais</td><td>Conexão TCP, portas, retransmissões</td></tr><tr><td>3. Rede</td><td>Endereçamento e encaminhamento</td><td>IP de destino, rotas, mensagens ICMP</td></tr><tr><td>2. Enlace</td><td>Comunicação no enlace local</td><td>Quadros Ethernet ou Wi-Fi, resolução de vizinhos</td></tr><tr><td>1. Física</td><td>Transmissão de sinais</td><td>Cabo, rádio, sinal e estado do link</td></tr></tbody></table>
+<p>Na pilha TCP/IP, essas responsabilidades são agrupadas de outra forma. A arquitetura descrita na RFC 1122 usa enlace, internet, transporte e aplicação. Não existe uma correspondência exata de uma camada para outra entre os dois modelos.</p>
+<p>TLS, por exemplo, participa da proteção e da negociação da comunicação. Colocá-lo em uma única caixa OSI pode servir como aproximação didática, mas não descreve sozinho como ele funciona sobre o transporte. Um cookie de sessão HTTP também não representa a implementação da camada 5.</p>
+<h2 id="escolher-o-caminho-que-vamos-observar">Escolher o caminho que vamos observar</h2>
+<p>Para reduzir as variações, o exemplo força HTTP/1.1 sobre TLS e TCP. HTTP/3 usa QUIC sobre UDP; nesse caso, procurar uma conexão TCP seria investigar o protocolo errado.</p>
+<p>Execute em uma API que você administra ou está autorizado a consultar. O endereço abaixo é um placeholder, precisa ser substituído. No PowerShell, use <code class="notranslate" translate="no">curl.exe</code> para chamar o executável:</p>
+<pre class="notranslate" style="background-color:#292D3E;color:#babed8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="sh" translate="no"><code class="notranslate" translate="no"><span class="line"><span style="color:#FFCB6B">curl</span><span style="color:#C3E88D"> --http1.1</span><span style="color:#C3E88D"> --verbose</span><span style="color:#C3E88D"> --connect-timeout</span><span style="color:#F78C6C"> 5</span><span style="color:#C3E88D"> --max-time</span><span style="color:#F78C6C"> 15</span><span style="color:#C3E88D"> https://api.example.com/health</span></span></code></pre>
+<p><code class="notranslate" translate="no">--connect-timeout</code> limita a fase de conexão, incluindo resolução de nome e negociação necessária para estabelecê-la. <code class="notranslate" translate="no">--max-time</code> limita a operação completa. O modo detalhado mostra a progressão da chamada.</p>
+<p>Um diagnóstico deve registrar horário, URL, rede de origem, resultado e código de saída. Evite colocar tokens e cookies em um log que será compartilhado: o modo detalhado pode mostrar esses cabeçalhos.</p>
+<h2 id="1-resolver-o-nome">1. Resolver o nome</h2>
+<p>Antes de conectar, o cliente precisa obter um endereço para <code class="notranslate" translate="no">api.example.com</code>. O resultado pode vir do cache, do arquivo de hosts ou de um resolvedor DNS, dependendo da configuração do sistema.</p>
+<pre class="notranslate" style="background-color:#292D3E;color:#babed8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="powershell" translate="no"><code class="notranslate" translate="no"><span class="line"><span style="color:#82AAFF">Resolve-DnsName</span><span style="color:#82AAFF"> api.example.com</span></span></code></pre>
+<p>Esse comando é do PowerShell no Windows. Em outros ambientes, <code class="notranslate" translate="no">dig</code> ou <code class="notranslate" translate="no">nslookup</code> permitem investigar a resolução.</p>
+<p>Verifique quais endereços foram retornados, inclusive IPv4 e IPv6. Um cliente pode falhar em um deles e funcionar no outro. Compare também o resolvedor da rede local com o usado pela aplicação.</p>
+<p>Um nome resolvido comprova que foi obtido um endereço. Não comprova que existe um serviço escutando naquele destino.</p>
+<p>DNS é um protocolo de aplicação. Portanto, uma falha na resolução não deve ser chamada automaticamente de “erro de camada 3” só porque ainda não temos o IP da API. O próprio DNS depende de comunicação de rede para obter a resposta quando não há um resultado local.</p>
+<h2 id="2-estabelecer-a-conexão-tcp">2. Estabelecer a conexão TCP</h2>
+<p>Com o endereço escolhido, o cliente tenta conectar à porta <code class="notranslate" translate="no">443</code>. Em uma conexão TCP nova, o estabelecimento envolve <code class="notranslate" translate="no">SYN</code>, <code class="notranslate" translate="no">SYN/ACK</code> e <code class="notranslate" translate="no">ACK</code>.</p>
+<p>No Windows, uma verificação isolada é:</p>
+<pre class="notranslate" style="background-color:#292D3E;color:#babed8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="powershell" translate="no"><code class="notranslate" translate="no"><span class="line"><span style="color:#82AAFF">Test-NetConnection</span><span style="color:#82AAFF"> api.example.com</span><span style="color:#89DDFF"> -</span><span style="color:#BABED8">Port </span><span style="color:#F78C6C">443</span><span style="color:#89DDFF"> -</span><span style="color:#BABED8">InformationLevel Detailed</span></span></code></pre>
+<p><code class="notranslate" translate="no">TcpTestSucceeded</code> informa o resultado da conexão TCP feita por esse comando. Não verifica o certificado nem a resposta HTTP.</p>
+<p>Se houver timeout, precisamos investigar rota, regras de firewall, disponibilidade do destino e caminho de retorno. O mesmo sintoma pode ter mais de uma causa. Se recebermos um reset ou “connection refused”, houve uma rejeição observável; isso ainda não identifica sozinho qual componente rejeitou.</p>
+<p><code class="notranslate" translate="no">ping</code> usa ICMP, não TCP na porta <code class="notranslate" translate="no">443</code>. Um host pode responder ao ping e ter a porta fechada. Também pode bloquear ICMP e atender HTTPS normalmente.</p>
+<h2 id="3-negociar-tls">3. Negociar TLS</h2>
+<p>Depois de estabelecer TCP, cliente e servidor negociam TLS. O cliente valida o certificado considerando, entre outras coisas, o nome solicitado, a cadeia de confiança e a validade temporal.</p>
+<p>Se o <code class="notranslate" translate="no">curl</code> mostra que conectou, mas termina com erro de certificado, já temos evidência de que a conexão chegou a um endpoint TLS. Agora a investigação precisa considerar o certificado apresentado e a configuração de confiança do cliente.</p>
+<p>Um erro frequente é testar <code class="notranslate" translate="no">https://IP_DO_SERVIDOR/</code> no lugar do nome. Isso altera o nome validado e pode alterar o certificado escolhido pelo servidor. Para testar um IP específico preservando o nome da URL, use:</p>
+<pre class="notranslate" style="background-color:#292D3E;color:#babed8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="sh" translate="no"><code class="notranslate" translate="no"><span class="line"><span style="color:#FFCB6B">curl</span><span style="color:#C3E88D"> --http1.1</span><span style="color:#C3E88D"> --verbose</span><span style="color:#C3E88D"> --resolve</span><span style="color:#C3E88D"> api.example.com:443:203.0.113.10</span><span style="color:#C3E88D"> https://api.example.com/health</span></span></code></pre>
+<p><code class="notranslate" translate="no">203.0.113.10</code> é um endereço reservado para documentação, não um destino de teste. Substitua pelo IP real autorizado.</p>
+<p><code class="notranslate" translate="no">--resolve</code> fornece a associação nome/porta/IP para essa execução. O nome da URL continua sendo usado na validação do certificado, no SNI e no cabeçalho HTTP. Isso permite comparar o caminho normal de resolução com um destino escolhido. A documentação do curl descreve esse <a href="https://everything.curl.dev/usingcurl/connections/name.html">uso de resolução explícita</a>.</p>
+<p>Usar <code class="notranslate" translate="no">-k</code> desativa a verificação do certificado. Uma chamada que funciona assim não demonstra que a configuração TLS está correta. Para uma autoridade interna, forneça a CA esperada com <code class="notranslate" translate="no">--cacert</code>, em vez de remover a validação.</p>
+<h2 id="4-observar-http">4. Observar HTTP</h2>
+<p>Com TLS estabelecido, o cliente envia a requisição HTTP. Uma resposta <code class="notranslate" translate="no">401</code>, <code class="notranslate" translate="no">403</code>, <code class="notranslate" translate="no">404</code> ou <code class="notranslate" translate="no">500</code> indica que algum componente HTTP respondeu.</p>
+<p>Esse componente pode ser um proxy, gateway ou a própria aplicação. O status sozinho não prova que o código do backend foi executado. Cabeçalhos, corpo, logs e IDs de correlação ajudam a descobrir quem produziu a resposta.</p>
+<p>Por padrão, o <code class="notranslate" translate="no">curl</code> pode terminar com código de saída <code class="notranslate" translate="no">0</code> mesmo recebendo HTTP <code class="notranslate" translate="no">500</code>. Para tratar status HTTP a partir de <code class="notranslate" translate="no">400</code> como falha sem perder o corpo:</p>
+<pre class="notranslate" style="background-color:#292D3E;color:#babed8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="sh" translate="no"><code class="notranslate" translate="no"><span class="line"><span style="color:#FFCB6B">curl</span><span style="color:#C3E88D"> --http1.1</span><span style="color:#C3E88D"> --fail-with-body</span><span style="color:#C3E88D"> --show-error</span><span style="color:#C3E88D"> --connect-timeout</span><span style="color:#F78C6C"> 5</span><span style="color:#C3E88D"> --max-time</span><span style="color:#F78C6C"> 15</span><span style="color:#C3E88D"> https://api.example.com/health</span></span></code></pre>
+<p>O código de saída do processo e o status HTTP são informações diferentes. Registre os dois.</p>
+<h2 id="medir-as-etapas">Medir as etapas</h2>
+<p>Podemos pedir ao <code class="notranslate" translate="no">curl</code> os tempos acumulados desde o início da operação, usando a opção <a href="https://everything.curl.dev/usingcurl/verbose/writeout.html">write-out</a>:</p>
+<pre class="notranslate" style="background-color:#292D3E;color:#babed8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="sh" translate="no"><code class="notranslate" translate="no"><span class="line"><span style="color:#FFCB6B">curl</span><span style="color:#C3E88D"> --http1.1</span><span style="color:#C3E88D"> --silent</span><span style="color:#C3E88D"> --show-error</span><span style="color:#C3E88D"> --output</span><span style="color:#C3E88D"> resposta.json</span><span style="color:#C3E88D"> --write-out</span><span style="color:#89DDFF"> '</span><span style="color:#C3E88D">dns=%{time_namelookup} tcp=%{time_connect} tls=%{time_appconnect} primeiro_byte=%{time_starttransfer} total=%{time_total} status=%{http_code}\n</span><span style="color:#89DDFF">'</span><span style="color:#C3E88D"> https://api.example.com/health</span></span></code></pre>
+<p><code class="notranslate" translate="no">time_connect</code> inclui o tempo anterior à conexão. Ele não representa apenas o tempo do TCP. Em uma chamada nova, direta, sem redirecionamento e com uma única tentativa, as diferenças entre os valores ajudam a estimar a duração de cada etapa.</p>
+<p><code class="notranslate" translate="no">time_starttransfer</code> mede até o primeiro byte da resposta. A diferença depois de TLS inclui envio da requisição e espera pela resposta. Não é uma medida isolada do tempo de CPU do servidor.</p>
+<p>Proxy, cache DNS, reutilização de conexões, múltiplos endereços e redirecionamentos mudam a interpretação. Por isso, compare chamadas feitas nas mesmas condições.</p>
+<h2 id="captura-de-pacotes">Captura de pacotes</h2>
+<p>Quando o log do cliente não explica a falha, uma captura feita no ponto correto ajuda a observar o que chegou à rede. No Wireshark, filtros de exibição úteis são:</p>
+<pre class="notranslate" style="background-color:#292D3E;color:#babed8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="text" translate="no"><code class="notranslate" translate="no"><span class="line"><span>dns</span></span>
+<span class="line"><span>tcp.port == 443</span></span>
+<span class="line"><span>tcp.analysis.retransmission</span></span>
+<span class="line"><span>tls</span></span></code></pre>
+<p>Esses são filtros de exibição, aplicados depois da captura. <code class="notranslate" translate="no">tcp.port == 443</code> também pode incluir serviços que usam outro protocolo nessa porta.</p>
+<p>Se aparecer um <code class="notranslate" translate="no">SYN</code> sem resposta, a captura mostra a tentativa naquele ponto de observação. Ela não prova qual firewall ou equipamento descartou o pacote. Uma captura no servidor pode mostrar uma situação diferente da captura no cliente.</p>
+<p>Como o tráfego HTTP está cifrado, normalmente não veremos os cabeçalhos nem o corpo da aplicação. O nome DNS também pode não aparecer: a resposta pode estar no cache ou a resolução pode usar DNS cifrado. Ausência no filtro não significa ausência da etapa.</p>
+<h2 id="separar-sintoma-de-causa">Separar sintoma de causa</h2>
+<p>Uma forma de registrar a investigação é anotar a última etapa comprovada e a primeira que falhou:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Resultado observado</th><th>O que já foi demonstrado</th><th>Próxima verificação</th></tr></thead><tbody><tr><td>Nome não resolvido</td><td>O cliente não obteve um endereço utilizável</td><td>Resolvedor, nome, cache e configuração local</td></tr><tr><td>TCP não estabelece</td><td>Houve tentativa de conexão sem sucesso</td><td>Destino, porta, rota e regras de rede</td></tr><tr><td>Certificado rejeitado</td><td>Um endpoint TLS foi alcançado</td><td>Nome, cadeia de confiança, relógio e certificado</td></tr><tr><td>HTTP 403</td><td>Um componente HTTP negou a requisição</td><td>Identidade, permissão e política do gateway ou serviço</td></tr><tr><td>HTTP 200 com corpo errado</td><td>Houve resposta HTTP de sucesso</td><td>Contrato, dados e comportamento da aplicação</td></tr></tbody></table>
+<p>O modelo OSI dá uma organização para essas perguntas. A evidência vem da requisição, dos logs e das capturas. Chamar tudo de “problema de rede” esconde as diferenças que precisamos investigar.</p>
+<h2 id="referências">Referências</h2>
+<ul>
+<li><a href="https://www.itu.int/rec/T-REC-X.200-199407-I/en">Modelo de referência OSI — ITU-T X.200</a>.</li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc1122">Arquitetura da pilha Internet — RFC 1122</a>.</li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc8446.html">TLS 1.3 — RFC 8446</a>.</li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc9114.html">HTTP/3 sobre QUIC — RFC 9114</a>.</li>
+<li><a href="https://curl.se/docs/manpage.html">Opções e medições do curl</a>.</li>
+<li><a href="https://www.wireshark.org/docs/wsug_html_chunked/ChWorkBuildDisplayFilterSection.html">Filtros de exibição do Wireshark</a>.</li>
+</ul></div><nav class="article-pagination" aria-label="Outros artigos"><a href="/posts/spring-security-sessao-jwt/"><span>Mais antigo</span><strong>← Autenticação com sessão e JWT usando Spring Security</strong></a></nav></article></main><footer class="site-footer"><span>© 2026 Neto Silveira</span><div><a href="/rss.xml">RSS</a><a href="https://github.com/zqovark" target="_blank" rel="noopener noreferrer">GitHub ↗</a><a href="#conteudo">Voltar ao topo ↑</a></div></footer></div></div></body></html>

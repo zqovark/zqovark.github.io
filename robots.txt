@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://zqovark.github.io/sitemap.xml

@@ -1,0 +1,92 @@
+<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#101218"><title>Threads · neto</title><meta name="description" content="Threads em Java: sincronização, estados, prioridade e escalonamento."><meta name="author" content="Neto Silveira"><link rel="canonical" href="https://zqovark.github.io/posts/thread/"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="alternate" type="application/rss+xml" title="neto RSS" href="/rss.xml"><meta property="og:type" content="article"><meta property="og:title" content="Threads · neto"><meta property="og:description" content="Threads em Java: sincronização, estados, prioridade e escalonamento."><meta property="og:url" content="https://zqovark.github.io/posts/thread/"><meta property="og:site_name" content="neto"><meta property="og:image" content="https://zqovark.github.io/social.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:locale" content="pt_BR"><meta name="twitter:card" content="summary_large_image"><meta property="article:published_time" content="2020-03-10T15:22:00.000Z"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Threads","description":"Threads em Java: sincronização, estados, prioridade e escalonamento.","url":"https://zqovark.github.io/posts/thread/","datePublished":"2020-03-10T15:22:00.000Z","dateModified":"2026-10-04T00:00:00.000Z","author":{"@type":"Person","name":"Neto Silveira","url":"https://zqovark.github.io/sobre/"}}</script><link rel="stylesheet" href="/_astro/Layout.DWrYQrxI.css"></head><body><a class="skip-link" href="#conteudo">Pular para o conteúdo</a><header class="site-header"><span class="frame-screw screw-start" aria-hidden="true"></span><span class="frame-screw screw-end" aria-hidden="true"></span><a class="wordmark notranslate" translate="no" data-glitch="neto." href="/" aria-label="Neto, página inicial">neto<span>.</span></a><a class="header-github" href="https://github.com/zqovark" target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true">↗</span></a><div class="language-control notranslate" translate="no"><span class="language-label">Idioma / Language</span><div id="translation-widget"></div><span class="language-fallback">Português</span></div><script>
+  (() => {
+    let storageAvailable = false;
+    try { localStorage.getItem('gt_autoswitch'); storageAvailable = true; } catch {}
+    window.gtranslateSettings = {
+      default_language: 'pt',
+      native_language_names: true,
+      detect_browser_language: storageAvailable,
+      wrapper_selector: '#translation-widget',
+      select_language_label: 'Idioma / Language',
+    };
+    const root = document.documentElement;
+    const rightToLeft = ['ar', 'iw', 'he', 'fa', 'ur', 'ps', 'sd', 'yi'];
+    function updateDirection() {
+      root.dir = rightToLeft.includes(root.lang.split('-')[0]) ? 'rtl' : 'ltr';
+    }
+    new MutationObserver(updateDirection).observe(root, { attributes: true, attributeFilter: ['lang'] });
+    updateDirection();
+  })();
+</script><script src="https://cdn.gtranslate.net/widgets/latest/dropdown.js" defer></script></header><p class="thinking-line"><span>O que estou pensando agora:</span> Interfaces adaptativas em sistemas web complexos e mudanças em tempo real com LLMs</p><div class="site-shell"><aside class="sidebar"><p class="sidebar-window-title">Links</p><nav class="primary-nav" aria-label="Navegação principal"><a href="/" aria-current="page">Escritos</a><a href="/projetos/">Projetos</a><a href="/sobre/">Sobre</a><a href="/search/">Buscar</a></nav><div class="sidebar-extra"><p class="sidebar-label">Temas</p><nav class="tag-nav" aria-label="Temas dos artigos"><a href="/tags/java/">#java</a><a href="/tags/api/">#api</a><a href="/tags/computacao-grafica/">#computação-gráfica</a><a href="/tags/concorrencia/">#concorrência</a><a href="/tags/http/">#http</a><a href="/tags/implementacao/">#implementação</a><a href="/tags/orientacao-a-objetos/">#orientação-a-objetos</a><a class="quiet-link" href="/tags/">Todas as tags <span aria-hidden="true">→</span></a></nav><p class="sidebar-label">Projetos</p><nav class="lab-nav" aria-label="Projetos"><a class="notranslate" translate="no" href="/projetos/synesthesia/">Synesthesia <span aria-hidden="true">↗</span></a><a class="notranslate" translate="no" href="/projetos/squelch/">Squelch <span aria-hidden="true">↗</span></a></nav><p class="sidebar-label">Acompanhe</p><a class="rss-link" href="/rss.xml">Feed RSS <span aria-hidden="true">↗</span></a></div></aside><div class="content-column"><main id="conteudo"><a class="back-link" href="/posts/">← Todos os escritos</a><article class="post-detail"><header class="article-heading"><p class="eyebrow">Escritos</p><h1>Threads</h1><p class="article-meta"><span class="notranslate" translate="no">Neto Silveira</span> <span aria-hidden="true">·</span> <time datetime="2020-03-10T15:22:00.000Z">10 de mar. de 2020</time> <span aria-hidden="true">·</span> 4 min de leitura</p><p class="article-meta">Atualizado em 04 de out. de 2026</p><ul class="post-tags" aria-label="Tags"><li><a href="/tags/java/">#java</a></li><li><a href="/tags/threads/">#threads</a></li><li><a href="/tags/concorrencia/">#concorrência</a></li></ul></header><details class="toc"><summary>Neste artigo</summary><nav aria-label="Sumário do artigo"><ul><li class="toc-depth-1"><a href="#introdução">Introdução</a></li><li class="toc-depth-1"><a href="#sincronização-de-threads">Sincronização de threads</a></li><li class="toc-depth-1"><a href="#estados-de-uma-thread">Estados de uma thread</a></li><li class="toc-depth-1"><a href="#prioridade">Prioridade</a></li><li class="toc-depth-1"><a href="#escalonamento">Escalonamento</a></li><li class="toc-depth-2"><a href="#referências">Referências</a></li></ul></nav></details><div class="prose"><p><a href="https://github.com/zqovark/threads" target="_blank" rel="noopener noreferrer">Repositório no GitHub</a></p>
+<p>Threads são as menores unidades de execução dentro de um processo. Elas permitem que várias tarefas sejam executadas de forma concorrente dentro do mesmo programa. Em uma aplicação com várias threads, cada uma tem seu próprio fluxo de execução.</p>
+<p>Quando trabalhamos com uma API que escreve em um banco de dados, threads permitem executar operações de forma concorrente. Isso pode melhorar o desempenho e o tempo de resposta da aplicação, já que várias threads podem consultar ou escrever dados ao mesmo tempo.</p>
+<p>Sem essa concorrência, as operações teriam que ser executadas uma depois da outra. Com threads, elas podem se sobrepor, reduzindo o tempo necessário para concluir as tarefas.</p>
+<p>Mas o acesso concorrente ao banco também pode trazer problemas de inconsistência e condições de corrida. Mecanismos de sincronização, como locks e semáforos, ajudam a controlar o acesso aos recursos compartilhados.</p>
+<h1 id="introdução">Introdução</h1>
+<p>Considere um computador com um único núcleo e quatro programas rodando ao mesmo tempo. O computador precisa utilizar concorrência para lidar com esses programas, mesmo que o núcleo só consiga executar uma instrução por vez.</p>
+<p>O sistema operacional gerencia o acesso das threads à CPU. Os algoritmos de escalonamento determinam qual delas vai executar em seguida.</p>
+<ul>
+<li>Nesse caso, a impressão de paralelismo vem da alternância entre as tarefas no mesmo núcleo.</li>
+</ul>
+<p>Agora considere um computador com dois núcleos e quatro programas rodando ao mesmo tempo. O programa 1 e o programa 2 estão usando o núcleo 1, enquanto o programa 3 e o programa 4 usam o núcleo 2.</p>
+<p>Suponha que o programa 1 tenha prioridade alta. Dependendo das decisões do escalonador, ele pode receber mais tempo de CPU, enquanto os outros programas dividem os recursos disponíveis.</p>
+<h1 id="sincronização-de-threads">Sincronização de threads</h1>
+<p>Locks, semáforos e sincronização podem ser utilizados para gerenciar recursos compartilhados e resolver problemas de concorrência.</p>
+<p>Clique <a href="https://github.com/zqovark/threads/tree/main/Conflicts" target="_blank" rel="noopener noreferrer">aqui</a> para ver exemplos e entender como eles podem ser utilizados.</p>
+<h1 id="estados-de-uma-thread">Estados de uma thread</h1>
+<p>Uma thread começa seu ciclo de vida no estado <code class="notranslate" translate="no">New</code> e permanece nele até ser iniciada.</p>
+<p>Quando está pronta para executar, ela entra no estado <code class="notranslate" translate="no">Runnable</code>. Os estados seguintes dependem do que acontece durante a execução: esperar um recurso, aguardar outra thread ou finalizar o trabalho, por exemplo.</p>
+<p>Se não houver nenhum problema, a thread termina depois de concluir sua tarefa. É possível acompanhar esses estados usando logs. O Java tem suporte para isso por meio do <code class="notranslate" translate="no">java.util.logging</code>.</p>
+<p>Uma thread pode estar nos seguintes estados:</p>
+<ul>
+<li>
+<h4 id="new"><code class="notranslate" translate="no">New</code></h4>
+<blockquote>
+<p>A thread foi criada, mas ainda não foi iniciada.</p>
+</blockquote>
+</li>
+<li>
+<h4 id="runnable"><code class="notranslate" translate="no">Runnable</code></h4>
+<blockquote>
+<p>A thread está pronta para executar ou já está executando.</p>
+</blockquote>
+</li>
+<li>
+<h4 id="blocked"><code class="notranslate" translate="no">Blocked</code></h4>
+<blockquote>
+<p>A thread está esperando para adquirir um monitor, como ao entrar em um bloco <code class="notranslate" translate="no">synchronized</code> ocupado por outra thread.</p>
+</blockquote>
+</li>
+<li>
+<h4 id="waiting"><code class="notranslate" translate="no">Waiting</code></h4>
+<blockquote>
+<p>A thread está esperando uma ação de outra thread, sem um tempo limite definido.</p>
+</blockquote>
+</li>
+<li>
+<h4 id="timed-waiting"><code class="notranslate" translate="no">Timed waiting</code></h4>
+<blockquote>
+<p>A thread está esperando por um período determinado.</p>
+</blockquote>
+<p><a href="https://github.com/zqovark/threads/blob/main/Sleep/Sleep.java" target="_blank" rel="noopener noreferrer">Aqui</a> tem um exemplo usando o método <code class="notranslate" translate="no">sleep</code> para colocar uma thread nesse estado.</p>
+</li>
+<li>
+<h4 id="terminated"><code class="notranslate" translate="no">Terminated</code></h4>
+<blockquote>
+<p>A thread terminou porque concluiu sua execução ou por causa de uma exceção não tratada.</p>
+</blockquote>
+</li>
+</ul>
+<h1 id="prioridade">Prioridade</h1>
+<p>Quando uma thread é criada, é possível definir sua prioridade. Se nenhuma prioridade for informada, a thread herda a prioridade da thread que a criou.</p>
+<p>No Java, existe uma escala de prioridade de 1 a 10 e as constantes <code class="notranslate" translate="no">MIN_PRIORITY</code> (1), <code class="notranslate" translate="no">NORM_PRIORITY</code> (5) e <code class="notranslate" translate="no">MAX_PRIORITY</code> (10).</p>
+<p>O método <code class="notranslate" translate="no">setPriority(int)</code> pode ser usado para definir a prioridade de uma thread de plataforma.</p>
+<p>O sistema operacional também considera outros fatores para gerenciar e escalonar as threads. Então, mesmo que uma prioridade tenha sido definida, ela não garante que aquela thread vai executar primeiro.</p>
+<h1 id="escalonamento">Escalonamento</h1>
+<p>O sistema operacional tem seus próprios algoritmos de escalonamento. Windows, Linux, macOS e outros sistemas podem tomar decisões diferentes sobre quais threads vão executar e por quanto tempo.</p>
+<p>Esse é um assunto de sistemas operacionais. Uma referência para estudar o tema está <a href="https://os.cs.luc.edu/scheduling.html">neste link</a>.</p>
+<h2 id="referências">Referências</h2>
+<ul>
+<li><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Thread.State.html">Estados de uma thread na documentação do Java</a>.</li>
+<li><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Thread.html">Criação e prioridade de threads na documentação do Java</a>.</li>
+</ul></div><nav class="article-pagination" aria-label="Outros artigos"><a href="/posts/solid-principles/"><span>Mais antigo</span><strong>← Princípios SOLID</strong></a><a href="/posts/rasterizador-3d-java/"><span>Mais recente</span><strong>Computação gráfica em Java: um rasterizador 3D →</strong></a></nav></article></main><footer class="site-footer"><span>© 2026 Neto Silveira</span><div><a href="/rss.xml">RSS</a><a href="https://github.com/zqovark" target="_blank" rel="noopener noreferrer">GitHub ↗</a><a href="#conteudo">Voltar ao topo ↑</a></div></footer></div></div></body></html>
