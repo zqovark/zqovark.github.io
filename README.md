@@ -2,20 +2,21 @@
 
 Registro de implementações e experimentos: https://zqovark.github.io/
 
-Este repositório recebe os arquivos estáticos gerados pelo blog. A publicação é automática.
+Este repositório contém o site estático. O GitHub Pages publica a raiz da branch `main`.
 
-## Tema Astral
+## Bellerophon
 
-Adaptação do [Astral para Omarchy](https://github.com/brmnl/omarchy-astral-theme),
-de Manuel Burki: superfícies quase pretas, bordas índigo, detalhes violeta e verde neon.
+A identidade usa a paleta do [Bellerophon para Omarchy](https://github.com/janooh37-hue/omarchy-bellerophon-theme), de Ahmed Al Ali: azul profundo, mármore, bronze e vermelho discreto. O wallpaper `09-sea-sentinel.webp` é distribuído com a [licença MIT original](assets/licenses/bellerophon-MIT.txt).
 
-- Estilos compartilhados: `assets/astral-theme.css`, carregados depois do CSS gerado em `_astro/`.
-- Wallpaper original: `images/astral/astral.webp`, distribuído com a [licença MIT do autor](assets/licenses/astral-MIT.txt).
-- Fonte local: [JetBrains Mono](https://github.com/JetBrains/JetBrainsMono), sob [SIL Open Font License](fonts/jetbrains-mono/OFL.txt).
-- Cores dos exemplos de código adaptadas à paleta Astral nos HTMLs dos artigos.
+- `assets/bellerophon.css`: layout, tipografia, paleta, responsividade e efeitos decorativos.
+- `assets/bellerophon.js`: controle de pausa dos efeitos, preferência salva e respeito a `prefers-reduced-motion` e à visibilidade da página.
+- `images/bellerophon/sea-sentinel.webp`: ilustração original, sem alterações no arquivo.
+- `fonts/bellerophon/`: Cinzel (títulos), Source Serif 4 (leitura) e IBM Plex Mono (navegação e código), hospedadas localmente com suas licenças SIL OFL.
 
-O tema é estático, funciona sem JavaScript e respeita a preferência por movimento reduzido.
-Busca, tradução e previews continuam usando os scripts existentes do blog.
+A navegação é horizontal. Na página inicial, escritos e projetos formam duas colunas; no celular, aparecem em sequência. Artigos usam uma coluna central de leitura.
 
-Ao gerar novamente o site a partir de outro repositório, preserve a referência ao CSS
-Astral, os assets e as cores de código; este repositório contém apenas o resultado estático.
+Os tratamentos de glitch foram escritos em CSS: recortes deslocados, dithering e linhas de CRT, com referência à pesquisa visual de [endlessmazin no Tumblr](https://endlessmazin.tumblr.com/). Nenhuma obra do artista é redistribuída. Os efeitos ficam na ilustração e na marca, sem deslocar o conteúdo dos artigos. Podem ser pausados e são desativados com movimento reduzido.
+
+O layout e a navegação funcionam sem JavaScript. Busca, tradução e previews mantêm os scripts existentes. O CSS legado em `_astro/` não é carregado pelo tema atual.
+
+Ao regenerar o site a partir de outro repositório, preserve o layout atualizado dos HTMLs, os assets Bellerophon, as referências no `<head>` e as cores dos exemplos de código. Este repositório contém apenas o resultado estático.
