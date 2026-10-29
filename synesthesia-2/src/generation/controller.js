@@ -333,3 +333,4 @@ function watch() {
 }
 $('#generate-open').onclick = panel;
 window.addEventListener('pagehide', () => clearTimeout(poll));
+
